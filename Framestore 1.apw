@@ -168,9 +168,29 @@
 <FilePathName>Marantz6008.axi</FilePathName>
 <Comments></Comments>
 </File>
+<File CompileType="Netlinx" Type="Include"><Identifier>SonyCam</Identifier>
+<FilePathName>SonyCam.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="Netlinx" Type="IR"><Identifier>sonycam.irl</Identifier>
+<FilePathName>sonycam.irl.irl</FilePathName>
+<Comments></Comments>
+<DeviceMap DevAddr="dvCam"><DevName>dvCam</DevName>
+</DeviceMap>
+</File>
 <File CompileType="Netlinx" Type="Include"><Identifier>Touchpanel</Identifier>
 <FilePathName>Touchpanel.axi</FilePathName>
 <Comments></Comments>
+</File>
+<File CompileType="Netlinx" Type="Include"><Identifier>Vidyo</Identifier>
+<FilePathName>Vidyo.axi</FilePathName>
+<Comments></Comments>
+</File>
+<File CompileType="Netlinx" Type="IR"><Identifier>vidyoir</Identifier>
+<FilePathName>vidyoir.irl</FilePathName>
+<Comments></Comments>
+<DeviceMap DevAddr="dvVidyo"><DevName>dvVidyo</DevName>
+</DeviceMap>
 </File>
 </System>
 </Project>

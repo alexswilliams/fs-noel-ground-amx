@@ -21,6 +21,13 @@ DEFINE_CONSTANT
     ATV_IR_RIGHT	= 48
     ATV_IR_OK		= 49
     
-    
-    
+
+DEFINE_FUNCTION ATV_SET_BAUD() {
+    SEND_COMMAND dvATV, 'SET MODE IR'
+}
+
+DEFINE_START
+    ATV_SET_BAUD()
+
+
 #end_if
