@@ -25,11 +25,12 @@ DEFINE_VARIABLE
     PhoneBook CLEARONE_PHONEBOOK[20]
     INTEGER CLEARONE_PHONEBOOK_LENGTH = 0
     
-    INTEGER CLEARONE_MATRIX[4][4] = {
-	{0, 0, 0, 0},
-	{0, 0, 0, 0},
-	{0, 0, 0, 0},
-	{0, 0, 0, 0}
+    INTEGER CLEARONE_MATRIX[5][5] = {
+	{0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0}
     }
     HMS CLEARONE_TimeConnected = {0,0,0}
     INTEGER CLEARONE_OffHook = 0
@@ -47,6 +48,7 @@ DEFINE_CONSTANT
     CLEARONE_MATRIX_SPEAKERS		= 2
     CLEARONE_MATRIX_CALL		= 3
     CLEARONE_MATRIX_VIDYO		= 4
+    CLEARONE_MATRIX_PC			= 5
     
     CLEARONE_MATRIX_CALL_TO_SPEAKER_LEFT	= 'A P 7 O'
     CLEARONE_MATRIX_CALL_TO_SPEAKER_RIGHT	= 'A P 8 O'
@@ -56,11 +58,13 @@ DEFINE_CONSTANT
     CLEARONE_MATRIX_VIDYO_TO_CALL		= '1 W 1 T'
     CLEARONE_MATRIX_MICS_TO_VIDYO		= 'B P 1 D'
     CLEARONE_MATRIX_MICS_TO_CALL		= 'B P 1 T'
+    CLEARONE_MATRIX_MICS_TO_PC			= 'B P 6 O'
 
 DEFINE_FUNCTION CHAR[3] CLEARONE_GET_MATRIX_FROM_NUM_Q(INTEGER inp, INTEGER is_destination) {
     switch (inp) {
 	case CLEARONE_MATRIX_MICS:	{ return '1 M' }
-	case CLEARONE_MATRIX_SPEAKERS:	{ return '1 O' }
+	case CLEARONE_MATRIX_SPEAKERS:	{ return '7 O' }
+	case CLEARONE_MATRIX_PC:	{ return '6 O' }
 	case CLEARONE_MATRIX_CALL:	{ if (is_destination==1) { return '1 T' } else { return '1 R'} }
 	case CLEARONE_MATRIX_VIDYO:	{ if (is_destination==1) { return '1 D' } else { return '1 W'} }
     }
@@ -150,6 +154,8 @@ DEFINE_FUNCTION CLEARONE_CALLBACK (DEV device, CHAR event[], CHAR paramStr[], IN
 		ifrom = CLEARONE_MATRIX_CALL; ito = CLEARONE_MATRIX_VIDYO
 	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_CALL, ' ?'") == 1) {
 		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_CALL
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_PC, ' ?'") == 1) {
+		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_PC
 	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_VIDYO, ' ?'") == 1) {
 		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_VIDYO
 	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_VIDYO_TO_CALL, ' ?'") == 1) {
@@ -284,6 +290,7 @@ DEFINE_FUNCTION CLEARONE_ROUTING_CLEAR_TO_DEFAULTS() {
     SEND_STRING dvClearOne, "'#K0 MTRX A P 8 O 1',$0d"		// Processing A (Telco) -> Out Right
     SEND_STRING dvClearOne, "'#K0 MTRX B P 1 T 1',$0d"		// Processing B (Mics) -> Telco
     SEND_STRING dvClearOne, "'#K0 MTRX B P 1 D 1',$0d"		// Processing B (Mics) -> USB
+    SEND_STRING dvClearOne, "'#K0 MTRX B P 6 O 1',$0d"		// Processing B (Mics) -> PC Line In
 }
 
 
