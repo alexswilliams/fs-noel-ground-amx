@@ -10,6 +10,7 @@ DEFINE_TYPE
     STRUCTURE PhoneBook {
 	CHAR NAME[32]
 	CHAR NUMBER[32]
+	INTEGER PRESET
     }
     STRUCTURE HMS {
 	INTEGER Hours
@@ -52,9 +53,9 @@ DEFINE_CONSTANT
     
     CLEARONE_MATRIX_CALL_TO_SPEAKER_LEFT	= 'A P 7 O'
     CLEARONE_MATRIX_CALL_TO_SPEAKER_RIGHT	= 'A P 8 O'
+    CLEARONE_MATRIX_CALL_TO_VIDYO		= 'A P 1 D'
     CLEARONE_MATRIX_VIDYO_TO_SPEAKER_LEFT	= '1 W 7 O'
     CLEARONE_MATRIX_VIDYO_TO_SPEAKER_RIGHT	= '1 W 8 O'
-    CLEARONE_MATRIX_CALL_TO_VIDYO		= '1 R 1 D'
     CLEARONE_MATRIX_VIDYO_TO_CALL		= '1 W 1 T'
     CLEARONE_MATRIX_MICS_TO_VIDYO		= 'B P 1 D'
     CLEARONE_MATRIX_MICS_TO_CALL		= 'B P 1 T'
@@ -100,7 +101,7 @@ DEFINE_FUNCTION CLEARONE_CALLBACK (DEV device, CHAR event[], CHAR paramStr[], IN
 	    CLEARONE_OffHook = (paramStr[3] - '0')
 	    CALLBACK(dvClearOne, 'PHONE_HOOK', paramStr[3], lastparam)
 	}
-	case 2: { CALLBACK(dvClearOne, 'DIALOUT', paramStr, lastparam) }
+	case 2: { CALLBACK(dvClearOne, 'DIALOUT', MID_STRING(paramStr, 3, LENGTH_STRING(paramStr) - 2), lastparam) }
 	case 3: {
 	    CLEARONE_TimeConnected.Hours = atoi("paramStr[3],paramStr[4]")
 	    CLEARONE_TimeConnected.Minutes = atoi("paramStr[6],paramStr[7]")
@@ -119,16 +120,30 @@ DEFINE_FUNCTION CLEARONE_CALLBACK (DEV device, CHAR event[], CHAR paramStr[], IN
 	}
 	case 7: {
 	    stack_var integer pos
+	    stack_var integer prevpos
 	    stack_var char buf[32]
+	    stack_var PhoneBook entry 
 	    
-	    pos = FIND_STRING(paramStr, ' ', 5)
-	    if (pos == 0) { return }
-   	    buf = CLEARONE_PHONEBOOK[paramInt+1].NAME
-	    CLEARONE_PHONEBOOK[paramInt+1].NUMBER = MID_STRING(paramStr, 5, pos-5)
-	    CLEARONE_PHONEBOOK[paramInt+1].NAME = MID_STRING(paramStr, pos+1, LENGTH_STRING(paramStr)-pos)
-	    if (buf != CLEARONE_PHONEBOOK[paramInt+1].NAME) {
-		CALLBACK(dvClearOne, 'PHONEBOOK_UPDATE', paramStr, lastparam)
-	    }
+	    //               123456789 12345...
+	    // PHONEBOOKREAD 0 2 2811 CAFE / RUNNERS
+	    //		     | |   |  +============+------- Name
+	    //		     | |   +----------------------- Number
+	    //               | +--------------------------- Speed Dial Preset
+	    //               +----------------------------- Index in Phonebook
+	    
+	    // Get Speed Dial number
+	    pos = FIND_STRING(paramStr, ' ', 3); if (pos == 0) { return }
+   	    entry.PRESET = atoi(MID_STRING(paramStr, 3, pos-3))
+	    
+	    // Get Number
+	    prevpos = pos+1; pos = FIND_STRING(paramStr, ' ', prevpos); if (pos == 0) { return }
+   	    entry.NUMBER = MID_STRING(paramStr, prevpos, pos-prevpos)
+	    
+	    // Get Name
+	    entry.NAME = MID_STRING(paramStr, pos+1, LENGTH_STRING(paramStr)-pos)
+	    
+	    CLEARONE_PHONEBOOK[entry.preset] = entry
+	    
 	    CALLBACK(dvClearOne, 'PHONEBOOK', paramStr, lastparam)
 	}
 	case 8: { CALLBACK(dvClearOne, 'AUTO_ANSWER', paramStr, lastparam) }
@@ -275,19 +290,29 @@ DEFINE_FUNCTION CLEARONE_ROUTING_QUERY(CHAR paramstring[]) { SEND_STRING dvClear
 DEFINE_FUNCTION CLEARONE_ROUTING_CLEAR_TO_DEFAULTS() {
     stack_var integer i
     stack_var integer j
-    for (i = 1; i <= 4; i++) { for (j = 1; j <= 4; j++) { CLEARONE_MATRIX[i][j] = 0 } }
+    for (i = 1; i <= 5; i++) { for (j = 1; j <= 5; j++) { CLEARONE_MATRIX[i][j] = 0 } }
     
     SEND_STRING dvClearOne, "'#K0 MTRXCLEAR',$0d"
     SEND_STRING dvClearOne, "'#K0 MTRX 1 R A P 1',$0d"		// Telco -> Processing A (Telco)
+    
     SEND_STRING dvClearOne, "'#K0 MTRX 1 M B P 4',$0d"		// Mics -> Processing B (Mic)
     SEND_STRING dvClearOne, "'#K0 MTRX 2 M B P 4',$0d"		// Mics -> Processing B (Mic)
     SEND_STRING dvClearOne, "'#K0 MTRX 3 M B P 4',$0d"		// Mics -> Processing B (Mic)
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 R 1 D 1',$0d"		// Telco -> USB
+    
+    SEND_STRING dvClearOne, "'#K0 MTRX 1 L 1 B 1',$0d"		// PC Line Out -> AEC Reference 1
+    
     SEND_STRING dvClearOne, "'#K0 MTRX 1 W 1 T 1',$0d"		// USB -> Telco
+    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 6 O 1',$0d"		// USB -> PC Line In
     SEND_STRING dvClearOne, "'#K0 MTRX 1 W 7 O 1',$0d"		// USB -> Out Left
     SEND_STRING dvClearOne, "'#K0 MTRX 1 W 8 O 1',$0d"		// USB -> Out Right
+    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 1 B 1',$0d"		// USB -> AEC Reference 1
+    
+    SEND_STRING dvClearOne, "'#K0 MTRX A P 1 D 1',$0d"		// Telco -> USB
+    SEND_STRING dvClearOne, "'#K0 MTRX A P 6 O 1',$0d"		// Processing A (Telco) -> PC Line In
     SEND_STRING dvClearOne, "'#K0 MTRX A P 7 O 1',$0d"		// Processing A (Telco) -> Out Left
     SEND_STRING dvClearOne, "'#K0 MTRX A P 8 O 1',$0d"		// Processing A (Telco) -> Out Right
+    SEND_STRING dvClearOne, "'#K0 MTRX A P 1 B 1',$0d"		// Processing A (Telco) -> AEC Reference 1
+    
     SEND_STRING dvClearOne, "'#K0 MTRX B P 1 T 1',$0d"		// Processing B (Mics) -> Telco
     SEND_STRING dvClearOne, "'#K0 MTRX B P 1 D 1',$0d"		// Processing B (Mics) -> USB
     SEND_STRING dvClearOne, "'#K0 MTRX B P 6 O 1',$0d"		// Processing B (Mics) -> PC Line In

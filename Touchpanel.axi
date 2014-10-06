@@ -20,6 +20,7 @@ DEFINE_CONSTANT
     TP_HELP		= 6
     TP_ENDCALL		= 7
     TP_CALLDUR		= 8
+    TP_CALLVOL		= 9
     
     TP_CALL		= 10
     TP_SKYPE		= 11

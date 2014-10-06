@@ -136,6 +136,10 @@
 <UserName></UserName>
 <Password></Password>
 <Comments></Comments>
+<File CompileType="Netlinx" Type="Include"><Identifier>APartConcept1</Identifier>
+<FilePathName>APartConcept1.axi</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="Netlinx" Type="Include"><Identifier>AppleTV</Identifier>
 <FilePathName>AppleTV.axi</FilePathName>
 <Comments></Comments>
@@ -146,12 +150,16 @@
 <DeviceMap DevAddr="dvATV"><DevName>dvATV</DevName>
 </DeviceMap>
 </File>
+<File CompileType="Netlinx" Type="Include"><Identifier>AtlonaATLINE</Identifier>
+<FilePathName>AtlonaATLINE.axi</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="Netlinx" Type="Include"><Identifier>ClearOneInteractPro</Identifier>
 <FilePathName>ClearOneInteractPro.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="Netlinx" Type="MasterSrc"><Identifier>Framestore-Master</Identifier>
-<FilePathName>Framestore-Master.axs</FilePathName>
+<File CompileType="Netlinx" Type="MasterSrc"><Identifier>Framestore-NoelG</Identifier>
+<FilePathName>Framestore-NoelG.axs</FilePathName>
 <Comments></Comments>
 </File>
 <File CompileType="Netlinx" Type="TP4"><Identifier>FS01</Identifier>
