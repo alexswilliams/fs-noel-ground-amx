@@ -172,10 +172,6 @@
 <FilePathName>LG_RS232.axi</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="Netlinx" Type="Include"><Identifier>Marantz6008</Identifier>
-<FilePathName>Marantz6008.axi</FilePathName>
-<Comments></Comments>
-</File>
 <File CompileType="Netlinx" Type="Include"><Identifier>SonyCam</Identifier>
 <FilePathName>SonyCam.axi</FilePathName>
 <Comments></Comments>

@@ -26,51 +26,32 @@ DEFINE_VARIABLE
     PhoneBook CLEARONE_PHONEBOOK[20]
     INTEGER CLEARONE_PHONEBOOK_LENGTH = 0
     
-    INTEGER CLEARONE_MATRIX[5][5] = {
-	{0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0}
-    }
+    INTEGER CLEARONE_MATRIX_CALLAUDIO = 0
+    INTEGER CLEARONE_MATRIX_ADDVIDYO = 0
+    INTEGER CLEARONE_MATRIX_ADDROOMPC = 0
+    INTEGER CLEARONE_MATRIX_MICS_TO_VIDYO = 0
+    INTEGER CLEARONE_MATRIX_MICS_TO_CALL = 1
+    INTEGER CLEARONE_MATRIX_MICS_TO_PC = 0
+    
     HMS CLEARONE_TimeConnected = {0,0,0}
     INTEGER CLEARONE_OffHook = 0
     INTEGER CLEARONE_MICGATE_LAST = 0
     
-    
+
+
 DEFINE_CONSTANT
+    CLEARONE_MATRIX_STRING_MICS_TO_CALL = 'B P 1 T'
+    CLEARONE_MATRIX_STRING_MICS_TO_VIDYO = 'B P 6 O'
+    CLEARONE_MATRIX_STRING_MICS_TO_ROOMPC = 'B P 1 D'
+    CLEARONE_MATRIX_STRING_ADD_CALL = 'A P 1 B'
+    CLEARONE_MATRIX_STRING_ADD_VIDYO = '1 L 1 B'
+    CLEARONE_MATRIX_STRING_ADD_ROOMPC = '1 W 1 B'
     
     
     CLEARONE_MUTE_UNMUTED		= 0
     CLEARONE_MUTE_MUTED			= 1
     CLEARONE_MUTE_TOGGLE		= 2
     
-    CLEARONE_MATRIX_MICS		= 1
-    CLEARONE_MATRIX_SPEAKERS		= 2
-    CLEARONE_MATRIX_CALL		= 3
-    CLEARONE_MATRIX_VIDYO		= 4
-    CLEARONE_MATRIX_PC			= 5
-    
-    CLEARONE_MATRIX_CALL_TO_SPEAKER_LEFT	= 'A P 7 O'
-    CLEARONE_MATRIX_CALL_TO_SPEAKER_RIGHT	= 'A P 8 O'
-    CLEARONE_MATRIX_CALL_TO_VIDYO		= 'A P 1 D'
-    CLEARONE_MATRIX_VIDYO_TO_SPEAKER_LEFT	= '1 W 7 O'
-    CLEARONE_MATRIX_VIDYO_TO_SPEAKER_RIGHT	= '1 W 8 O'
-    CLEARONE_MATRIX_VIDYO_TO_CALL		= '1 W 1 T'
-    CLEARONE_MATRIX_MICS_TO_VIDYO		= 'B P 1 D'
-    CLEARONE_MATRIX_MICS_TO_CALL		= 'B P 1 T'
-    CLEARONE_MATRIX_MICS_TO_PC			= 'B P 6 O'
-
-DEFINE_FUNCTION CHAR[3] CLEARONE_GET_MATRIX_FROM_NUM_Q(INTEGER inp, INTEGER is_destination) {
-    switch (inp) {
-	case CLEARONE_MATRIX_MICS:	{ return '1 M' }
-	case CLEARONE_MATRIX_SPEAKERS:	{ return '7 O' }
-	case CLEARONE_MATRIX_PC:	{ return '6 O' }
-	case CLEARONE_MATRIX_CALL:	{ if (is_destination==1) { return '1 T' } else { return '1 R'} }
-	case CLEARONE_MATRIX_VIDYO:	{ if (is_destination==1) { return '1 D' } else { return '1 W'} }
-    }
-}
-
 
 DEFINE_FUNCTION CLEARONE_SET_BAUD() {
     if (CLEARONE_Baud_Set == 't') { return }
@@ -93,7 +74,7 @@ DEFINE_FUNCTION CLEARONE_CALLBACK (DEV device, CHAR event[], CHAR paramStr[], IN
 	sparam = atoi(paramStr)
     }
     
-    SEND_STRING 0:0:0, "'CLEARONE - ',event,': ',paramStr, ' (',itohex(paramInt),':',itohex(lastparam),':',itoa(sparam),')'"
+    //SEND_STRING 0:0:0, "'CLEARONE - ',event,': ',paramStr, ' (',itohex(paramInt),':',itohex(lastparam),':',itoa(sparam),')'"
     icmd = CLEARONE_CMD_TO_INT(event)
     
     switch (icmd) {
@@ -161,26 +142,20 @@ DEFINE_FUNCTION CLEARONE_CALLBACK (DEV device, CHAR event[], CHAR paramStr[], IN
 	case 17: { CALLBACK(dvClearOne, 'TELCO_LOOPBACK_ECHO_CANCELLATION', paramStr, lastparam) }
 	case 18: { CALLBACK(dvClearOne, 'VOLUME', paramStr, paramInt) }
 	case 19: {
-	    stack_var integer ifrom
-	    stack_var integer ito
-	    if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_CALL_TO_SPEAKER_LEFT, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_CALL; ito = CLEARONE_MATRIX_SPEAKERS
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_CALL_TO_VIDYO, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_CALL; ito = CLEARONE_MATRIX_VIDYO
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_CALL, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_CALL
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_PC, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_PC
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_MICS_TO_VIDYO, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_MICS; ito = CLEARONE_MATRIX_VIDYO
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_VIDYO_TO_CALL, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_VIDYO; ito = CLEARONE_MATRIX_CALL
-	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_VIDYO_TO_SPEAKER_LEFT, ' ?'") == 1) {
-		ifrom = CLEARONE_MATRIX_VIDYO; ito = CLEARONE_MATRIX_SPEAKERS
-	    } else { return }
 	    if (lastparam > 1) { lastparam = 1 }
-	    CLEARONE_MATRIX[ifrom][ito] = lastparam
-	    SEND_STRING 0:0:0, "'Setting MATRIX[',itoa(ifrom),'][',itoa(ito),'] = ',itoa(lastparam)"
+	    if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_ADD_CALL, ' ?'") == 1) {
+		CLEARONE_MATRIX_CALLAUDIO = lastparam
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_ADD_ROOMPC, ' ?'") == 1) {
+		CLEARONE_MATRIX_ADDROOMPC = lastparam
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_ADD_VIDYO, ' ?'") == 1) {
+		CLEARONE_MATRIX_ADDVIDYO = lastparam
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_MICS_TO_CALL, ' ?'") == 1) {
+		CLEARONE_MATRIX_MICS_TO_CALL = lastparam
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_MICS_TO_ROOMPC, ' ?'") == 1) {
+		CLEARONE_MATRIX_MICS_TO_PC = lastparam
+	    } else if (COMPARE_STRING(paramStr, "CLEARONE_MATRIX_STRING_MICS_TO_VIDYO, ' ?'") == 1) {
+		CLEARONE_MATRIX_MICS_TO_VIDYO = lastparam
+	    } else { return }
 	    CALLBACK(dvClearOne, 'MATRIX_UPDATE', paramStr, lastparam)
 	}
 	case 20: {
@@ -288,9 +263,12 @@ DEFINE_FUNCTION CLEARONE_ROUTING(CHAR paramstring[], INTEGER value) { SEND_STRIN
 DEFINE_FUNCTION CLEARONE_ROUTING_TOGGLE(CHAR paramstring[]) { CLEARONE_ROUTING(paramstring, 2) }
 DEFINE_FUNCTION CLEARONE_ROUTING_QUERY(CHAR paramstring[]) { SEND_STRING dvClearOne, "'#K0 MTRX ',paramstring,$0d" }
 DEFINE_FUNCTION CLEARONE_ROUTING_CLEAR_TO_DEFAULTS() {
-    stack_var integer i
-    stack_var integer j
-    for (i = 1; i <= 5; i++) { for (j = 1; j <= 5; j++) { CLEARONE_MATRIX[i][j] = 0 } }
+    CLEARONE_MATRIX_ADDROOMPC = 0
+    CLEARONE_MATRIX_ADDVIDYO = 0
+    CLEARONE_MATRIX_CALLAUDIO = 1
+    CLEARONE_MATRIX_MICS_TO_CALL = 1
+    CLEARONE_MATRIX_MICS_TO_VIDYO = 0
+    CLEARONE_MATRIX_MICS_TO_PC = 0
     
     SEND_STRING dvClearOne, "'#K0 MTRXCLEAR',$0d"
     SEND_STRING dvClearOne, "'#K0 MTRX 1 R A P 1',$0d"		// Telco -> Processing A (Telco)
@@ -298,24 +276,50 @@ DEFINE_FUNCTION CLEARONE_ROUTING_CLEAR_TO_DEFAULTS() {
     SEND_STRING dvClearOne, "'#K0 MTRX 1 M B P 4',$0d"		// Mics -> Processing B (Mic)
     SEND_STRING dvClearOne, "'#K0 MTRX 2 M B P 4',$0d"		// Mics -> Processing B (Mic)
     SEND_STRING dvClearOne, "'#K0 MTRX 3 M B P 4',$0d"		// Mics -> Processing B (Mic)
+
+    SEND_STRING dvClearOne, "'#K0 MTRX 7 M 1 O 4',$0d"		// Mixer Output -> Amp Input
+    SEND_STRING dvClearOne, "'#K0 MTRX 8 M 2 O 4',$0d"		// Mixer Output -> Amp Input
     
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 L 1 B 1',$0d"		// PC Line Out -> AEC Reference 1
     
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 1 T 1',$0d"		// USB -> Telco
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 6 O 1',$0d"		// USB -> PC Line In
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 7 O 1',$0d"		// USB -> Out Left
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 8 O 1',$0d"		// USB -> Out Right
-    SEND_STRING dvClearOne, "'#K0 MTRX 1 W 1 B 1',$0d"		// USB -> AEC Reference 1
+    CLEARONE_ROUTING_ADD_CALL_AUDIO(1)
+    CLEARONE_ROUTING_ADD_VIDYO(0)
+    CLEARONE_ROUTING_ADD_ROOMPC(0)
     
-    SEND_STRING dvClearOne, "'#K0 MTRX A P 1 D 1',$0d"		// Telco -> USB
-    SEND_STRING dvClearOne, "'#K0 MTRX A P 6 O 1',$0d"		// Processing A (Telco) -> PC Line In
-    SEND_STRING dvClearOne, "'#K0 MTRX A P 7 O 1',$0d"		// Processing A (Telco) -> Out Left
-    SEND_STRING dvClearOne, "'#K0 MTRX A P 8 O 1',$0d"		// Processing A (Telco) -> Out Right
-    SEND_STRING dvClearOne, "'#K0 MTRX A P 1 B 1',$0d"		// Processing A (Telco) -> AEC Reference 1
-    
-    SEND_STRING dvClearOne, "'#K0 MTRX B P 1 T 1',$0d"		// Processing B (Mics) -> Telco
-    SEND_STRING dvClearOne, "'#K0 MTRX B P 1 D 1',$0d"		// Processing B (Mics) -> USB
-    SEND_STRING dvClearOne, "'#K0 MTRX B P 6 O 1',$0d"		// Processing B (Mics) -> PC Line In
+    CLEARONE_ROUTING_MICS_TO_CALL(1)
+    CLEARONE_ROUTING_MICS_TO_VIDYO(1)
+    CLEARONE_ROUTING_MICS_TO_ROOMPC(1)
+}
+
+
+DEFINE_FUNCTION CLEARONE_ROUTING_MICS_TO_CALL(INTEGER isactive) {
+    CLEARONE_ROUTING('B P 1 T', isactive)	// Mics -> Call
+}
+DEFINE_FUNCTION CLEARONE_ROUTING_MICS_TO_VIDYO(INTEGER isactive) {
+    CLEARONE_ROUTING('B P 6 O', isactive)	// Mics -> Line Out (Vidyo)
+}
+DEFINE_FUNCTION CLEARONE_ROUTING_MICS_TO_ROOMPC(INTEGER isactive) {
+    CLEARONE_ROUTING('B P 1 D', isactive)	// Mics -> USB (PC)
+}
+DEFINE_FUNCTION CLEARONE_ROUTING_ADD_CALL_AUDIO(INTEGER isactive) {
+    CLEARONE_ROUTING('A P 1 D', isactive)	// Call -> USB (PC)
+    CLEARONE_ROUTING('A P 6 O', isactive)	// Call -> Line Out (Vidyo)
+    CLEARONE_ROUTING('A P 1 O', isactive)	// Call -> Speakers
+    CLEARONE_ROUTING('A P 2 O', isactive)	// Call -> Speakers
+    CLEARONE_ROUTING('A P 1 B', isactive)	// Call -> AEC Reference
+}
+DEFINE_FUNCTION CLEARONE_ROUTING_ADD_VIDYO(INTEGER isactive) {
+    CLEARONE_ROUTING('1 L 1 D', isactive)	// Line In -> USB (PC)
+    CLEARONE_ROUTING('1 L 1 T', isactive)	// Line In -> Call
+    CLEARONE_ROUTING('1 L 1 O', isactive)	// Line In -> Speakers
+    CLEARONE_ROUTING('1 L 2 O', isactive)	// Line In -> Speakers
+    CLEARONE_ROUTING('1 L 1 B', isactive)	// Line In -> AEC Reference
+}
+DEFINE_FUNCTION CLEARONE_ROUTING_ADD_ROOMPC(INTEGER isactive) {
+    CLEARONE_ROUTING('1 W 1 T', isactive)	// USB -> Call
+    CLEARONE_ROUTING('1 W 6 O', isactive)	// USB -> Line Out (Vidyo)
+    CLEARONE_ROUTING('1 W 1 O', isactive)	// USB -> Speakers
+    CLEARONE_ROUTING('1 W 2 O', isactive)	// USB -> Speakers
+    CLEARONE_ROUTING('1 W 1 B', isactive)	// USB -> AEC Reference
 }
 
 
@@ -372,12 +376,12 @@ DEFINE_EVENT
 	    case 21:{ CLEARONE_NOISECANCELLATION_QUERY() }
 	    case 22:{ CLEARONE_PHONEBOOK_COUNT()	}
 	    case 23:{ CLEARONE_RINGER_QUERY()		}
-	    case 24:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_CALL_TO_SPEAKER_LEFT) }
-	    case 25:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_CALL_TO_VIDYO) }
-	    case 26:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_VIDYO_TO_CALL) }
-	    case 27:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_VIDYO_TO_SPEAKER_LEFT) }
-	    case 28:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_MICS_TO_CALL) }
-	    case 29:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_MICS_TO_VIDYO) }
+	    case 24:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_MICS_TO_CALL) }
+	    case 25:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_MICS_TO_ROOMPC) }
+	    case 26:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_MICS_TO_VIDYO) }
+	    case 27:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_ADD_CALL) }
+	    case 28:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_ADD_ROOMPC) }
+	    case 29:{ CLEARONE_ROUTING_QUERY(CLEARONE_MATRIX_STRING_ADD_VIDYO) }
 	    case 30:{  }
 	}
     }
