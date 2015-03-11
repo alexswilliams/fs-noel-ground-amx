@@ -213,57 +213,39 @@ DEFINE_FUNCTION SET_NUMBER_BOXES_TO_NUMBER(CHAR Number[]) {
     
     
     if ((LENGTH_STRING(Number) >= 2) and (Number[1] == '9')) {
-	sep1 = 0;	sep2 = 0;	sep3 = 0;
-	switch (Number[2]) {
-	    // UK NATIONAL
-	    case '0': {
-		if (LENGTH_STRING(Number) >= 4) {
-		    if (COMPARE_STRING(MID_STRING(Number,2,3), '02?')) { sep1 = 5; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,3), '055')) { sep1 = 5; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,3), '056')) { sep1 = 5; sep2 = 9 }
+		sep1 = 0;	sep2 = 0;	sep3 = 0;
+		switch (Number[2]) {
+			// UK NATIONAL
+			case '0': {
+			if (LENGTH_STRING(Number) >= 4) {
+				if (COMPARE_STRING(MID_STRING(Number,2,3), '02?')) { sep1 = 5; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,3), '055')) { sep1 = 5; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,3), '056')) { sep1 = 5; sep2 = 9 }
+			}
+			if ((LENGTH_STRING(Number) >= 6) and (sep1 == 0)) {
+				if (COMPARE_STRING(MID_STRING(Number,2,4), '011?')) { sep1 = 6; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,4), '01?1')) { sep1 = 6; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,4), '03??')) { sep1 = 6; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,4), '08??')) { sep1 = 6; sep2 = 9 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,4), '09??')) { sep1 = 6; sep2 = 9 }
+			}
+			if ((LENGTH_STRING(Number) >= 6) and (sep1 == 0)) {
+				if (COMPARE_STRING(MID_STRING(Number,2,5), '01???')) { sep1 = 7; sep2 = 10 }
+				else if (COMPARE_STRING(MID_STRING(Number,2,5), '07???')) { sep1 = 7; sep2 = 10 }
+			}
+			sep3 = 2
+			for (i = 1, j = 1; i <= LENGTH_STRING(Number); i++, j++) {
+				if (i == sep1) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
+				if (i == sep2) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
+				if (i == sep3) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
+				CURRENT_PHONE_NUMBER_SPACED[j] = Number[i]
+			}
+			SET_LENGTH_STRING(CURRENT_PHONE_NUMBER_SPACED, j-1)
+			}
+			default: { CURRENT_PHONE_NUMBER_SPACED = Number }
 		}
-		if ((LENGTH_STRING(Number) >= 6) and (sep1 == 0)) {
-		    if (COMPARE_STRING(MID_STRING(Number,2,4), '011?')) { sep1 = 6; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,4), '01?1')) { sep1 = 6; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,4), '03??')) { sep1 = 6; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,4), '08??')) { sep1 = 6; sep2 = 9 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,4), '09??')) { sep1 = 6; sep2 = 9 }
-		}
-		if ((LENGTH_STRING(Number) >= 6) and (sep1 == 0)) {
-		    if (COMPARE_STRING(MID_STRING(Number,2,5), '01???')) { sep1 = 7; sep2 = 10 }
-		    else if (COMPARE_STRING(MID_STRING(Number,2,5), '07???')) { sep1 = 7; sep2 = 10 }
-		}
-		sep3 = 2
-		for (i = 1, j = 1; i <= LENGTH_STRING(Number); i++, j++) {
-		    if (i == sep1) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
-		    if (i == sep2) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
-		    if (i == sep3) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
-		    CURRENT_PHONE_NUMBER_SPACED[j] = Number[i]
-		}
-		SET_LENGTH_STRING(CURRENT_PHONE_NUMBER_SPACED, j-1)
-	    }
-	    // AMERICA
-	    case '1': {
-		if (COMPARE_STRING(Number, '91?1') == 1) {
-		    CURRENT_PHONE_NUMBER_SPACED = Number
-		} else {
-		    sep1 = 3
-		    sep2 = 6
-		    sep3 = 9
-		    for (i = 1, j = 1; i <= LENGTH_STRING(Number); i++, j++) {
-			if (i == 2) { CURRENT_PHONE_NUMBER_SPACED[j] = '+'; j++ }
-			if (i == sep1) { CURRENT_PHONE_NUMBER_SPACED[j] = ' '; j++ }
-			if (i == sep2) { CURRENT_PHONE_NUMBER_SPACED[j] = '-'; j++ }
-			if (i == sep3) { CURRENT_PHONE_NUMBER_SPACED[j] = '-'; j++ }
-			CURRENT_PHONE_NUMBER_SPACED[j] = Number[i]
-		    }
-		    SET_LENGTH_STRING(CURRENT_PHONE_NUMBER_SPACED, j-1)
-		}
-	    }
-	    default: { CURRENT_PHONE_NUMBER_SPACED = Number }
-	}
     } else {
-	CURRENT_PHONE_NUMBER_SPACED = Number
+		CURRENT_PHONE_NUMBER_SPACED = Number
     }
     
     TP_BUTTON_TEXT(TP_CALL_DIAL_NUMBER_BOX, CURRENT_PHONE_NUMBER_SPACED)
